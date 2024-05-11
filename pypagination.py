@@ -1,29 +1,17 @@
 import base64
 import json
-from typing import List, TypeVar, Sequence, Tuple, Optional
+from typing import Sequence, Optional, Any
 
 import sqlalchemy
-from pydantic import BaseModel
 from sqlalchemy import Row
 
-T = TypeVar('T')
-
-class PageData(BaseModel):
-    next_page_token: str
-    items: List[T]
+from constants import Constants
+from models import PageToken, PageData
 
 
-class PageToken(BaseModel):
-    total_count: int
-    page_size: int
-    remaining: int
-    page_num: int
-    offset: int
-    elements_fetched: int
+class PyPagination:
 
-class Pagination:
-
-    def __init__(self, session, query: sqlalchemy.orm.query.Query, page_size:int):
+    def __init__(self, session, query: sqlalchemy.orm.query.Query, page_size:int=Constants.DEFAULT_PAGE_SIZE):
         self.session = session
         self.query = query
         self.page_size = page_size
@@ -41,7 +29,7 @@ class Pagination:
         return self.make_token(page_token)
 
 
-    def paginate(self, token: str = None) -> Tuple[Sequence[Row], Optional[str]]:
+    def paginate(self, token: str = None) -> PageData[Any]:
         if token is None:
             page_token = self.decode_token(self.make_first_token())
             page_token.total_count = self.query.count()
@@ -70,7 +58,7 @@ class Pagination:
                 )
             )
 
-        return result, next_page_token
+        return PageData(items=result, next_page_token=next_page_token)
 
     @staticmethod
     def make_token(page_token: PageToken):
