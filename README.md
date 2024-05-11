@@ -1,1 +1,1 @@
-Python library for easy pagination
+Python library that provides easy to integrate pagination
