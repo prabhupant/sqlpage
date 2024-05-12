@@ -9,7 +9,7 @@ from constants import Constants
 from models import PageToken, PageData
 
 
-class PyPagination:
+class SQLPage:
 
     def __init__(self, session, query: sqlalchemy.orm.query.Query, page_size:int=Constants.DEFAULT_PAGE_SIZE):
         self.session = session
