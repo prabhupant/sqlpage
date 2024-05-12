@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlmodel import Session, SQLModel, Field
 
-from models import PageData
-from pypagination import PyPagination
+from src.models import PageData
+from src.pypagination import PyPagination
 
 DATABASE_NAME = 'test_pypagination.db'
 TABLE_NAME = "test_table"
