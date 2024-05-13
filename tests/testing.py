@@ -2,23 +2,15 @@ import sqlite3
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlmodel import Session, SQLModel, Field
+from sqlalchemy.orm import sessionmaker
+from sqlmodel import Session
 
-from sqlpage import paginate, PageData
+from src.sqlpage import paginate, PageData
 
 DATABASE_NAME = 'test_pypagination.db'
 TABLE_NAME = "test_table"
 
 Base = declarative_base()
-
-
-class TestTable(SQLModel, table=True):
-    __tablename__ = 'test_table'
-
-    id: int = Field(primary_key=True)
-    username: str = Field(default=None)
-    email: str = Field(default=None)
-
 
 def create_and_populate_database():
     conn = sqlite3.connect(DATABASE_NAME)
@@ -44,33 +36,60 @@ def create_and_populate_database():
     conn.close()
 
 
-def check_pagination():
-    # Create an engine to connect to your SQLite database
-    engine = create_engine(f"sqlite:///{DATABASE_NAME}", echo=True)
+def check_pagination_sqlmodel():
+    print("Testing for SQLModel ORM")
+
+    engine = create_engine(f"sqlite:///{DATABASE_NAME}", echo=False)
     Base.metadata.create_all(engine)
 
-    # Create a session
     with Session(engine) as session:
+        call_pagination_and_test(session, orm="sqlmodel")
 
-        query = session.query(TestTable)
+def check_pagination_sqlalchemy():
+    print("Testing for SQLAlchemy ORM")
 
-        result: PageData = paginate(session, query, page_size=10)
+    engine = create_engine(f"sqlite:///{DATABASE_NAME}", echo=False)
+    Base.metadata.create_all(engine)
 
-        print(result)
-        print("*" * 50)
-        print(result.next_page_token)
-        print("*" * 50)
-        print(len(result.items))
-        print("*" * 50)
+    SessionSqlAlchemy = sessionmaker(bind=engine)
+    session = SessionSqlAlchemy()
 
-        assert result is not None
-        assert result.next_page_token is not None
-        assert len(result.items) == 10
+    call_pagination_and_test(session, orm="sqlalchemy")
+
+
+def call_pagination_and_test(session, orm: str):
+    page_size = 10
+
+    if orm == "sqlalchemy":
+        from tests.table_model import TestTableSqlAlchemy as TestTable
+    elif orm == "sqlmodel":
+        from tests.table_model import TestTableSqlModel as TestTable
+    else:
+        raise ValueError('Invalid ORM type. Please select either sqlalchemy or sqlmodel')
+
+    query = session.query(TestTable)
+
+    result: PageData = paginate(session, query, page_size=page_size)
+
+    print(f"Result length - {len(result.items)}")
+    print(f"Called with page size - {page_size}")
+    print(f"Next page token - {result.next_page_token}")
+
+    page_size = page_size + 20
+
+    print(f"Now querying for next page with page size {page_size}")
+
+    result: PageData = paginate(session, query, page_size=page_size, token=result.next_page_token)
+
+    print(f"Result length - {len(result.items)}")
+    print(f"Called with page size - {page_size}")
+    print(f"Next page token - {result.next_page_token}")
 
 
 if __name__ == "__main__":
     create_and_populate_database()
-    check_pagination()
+    check_pagination_sqlalchemy()
+    check_pagination_sqlmodel()
 
 
 

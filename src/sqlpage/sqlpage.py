@@ -3,6 +3,7 @@ import json
 from typing import Sequence, Optional, Any
 
 import sqlalchemy
+import sqlmodel
 from sqlalchemy import Row
 from .models import PageData, PageToken
 
@@ -24,9 +25,13 @@ def paginate(session, query: sqlalchemy.orm.query.Query, token: str = None, page
     else:
         page_token = decode_token(token)
 
+        # Since this is the second time call, so check if the page_size if not the default value, and then update it here
+        if page_size != 10:
+            page_token.page_size = page_size
+
     statement = query.limit(page_token.page_size).offset(page_token.offset)
 
-    result: Sequence[Row] = session.exec(statement).all()
+    result: Sequence[Row] = get_result(session, statement)
 
     size = len(result)
 
@@ -47,6 +52,22 @@ def paginate(session, query: sqlalchemy.orm.query.Query, token: str = None, page
         )
 
     return PageData(items=result, next_page_token=next_page_token)
+
+
+def get_result(session, statement) -> Sequence[Row]:
+    result: Sequence[Row]
+
+    if isinstance(session, sqlmodel.orm.session.Session):
+        return session.exec(statement).all()
+    elif isinstance(session, sqlalchemy.orm.session.Session):
+        return session.execute(statement).all()
+    else:
+        raise Exception(f"Unsupported session type {type(session)} passed. "
+                        f"Please use session for SQLAlchemy or SQLModel")
+
+def run_on_sqlalchemy(session):
+    isinstance(session, sqlalchemy.orm.session.Session)
+    pass
 
 def make_first_token(query: sqlalchemy.orm.query.Query, page_size: int = 10):
     total_count = query.count()
