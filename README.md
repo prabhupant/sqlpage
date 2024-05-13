@@ -14,8 +14,23 @@ pip install sqlpage
 Now configure your ORM and then simply call the `paginate` function to get the paginated results.
 
 ```python
-result: PageData = paginate(session, query, page_size=page_size)
+result: PageData = paginate(session, query, page_size=100)
 ```
+
+This will return a `PageData` object that will have the following structure
+
+```json
+{
+  "next_page_token": "base64 encoded string",
+  "items":[
+    ...
+    ...
+    ...
+  ]
+}
+```
+
+For end-to-end implementation, refer to [testing](tests/testing.py)
 
 ## Configuring with ORMs
 
