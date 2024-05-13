@@ -65,10 +65,6 @@ def get_result(session, statement) -> Sequence[Row]:
         raise Exception(f"Unsupported session type {type(session)} passed. "
                         f"Please use session for SQLAlchemy or SQLModel")
 
-def run_on_sqlalchemy(session):
-    isinstance(session, sqlalchemy.orm.session.Session)
-    pass
-
 def make_first_token(query: sqlalchemy.orm.query.Query, page_size: int = 10):
     total_count = query.count()
     page_token: PageToken = PageToken(
