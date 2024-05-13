@@ -4,8 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlmodel import Session, SQLModel, Field
 
-from src.models import PageData
-from src.sqlpage import SQLPage
+from sqlpage import paginate, PageData
 
 DATABASE_NAME = 'test_pypagination.db'
 TABLE_NAME = "test_table"
@@ -55,7 +54,14 @@ def check_pagination():
 
         query = session.query(TestTable)
 
-        result: PageData = SQLPage(session, query, page_size=10).paginate()
+        result: PageData = paginate(session, query, page_size=10)
+
+        print(result)
+        print("*" * 50)
+        print(result.next_page_token)
+        print("*" * 50)
+        print(len(result.items))
+        print("*" * 50)
 
         assert result is not None
         assert result.next_page_token is not None

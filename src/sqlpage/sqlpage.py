@@ -4,8 +4,8 @@ from typing import Sequence, Optional, Any
 
 import sqlalchemy
 from sqlalchemy import Row
+from .models import PageData, PageToken
 
-from models import PageToken, PageData
 
 def paginate(session, query: sqlalchemy.orm.query.Query, token: str = None, page_size: int = 10) -> PageData[Any]:
     """
