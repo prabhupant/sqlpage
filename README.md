@@ -49,7 +49,7 @@ session = SessionSqlAlchemy()
 
 query = session.query(TestTable)
 
-result: PageData = paginate(session, query, page_size=page_size)
+result: PageData = paginate(session, query, page_size=100)
 ```
 
 ### SQLModel
@@ -57,8 +57,8 @@ result: PageData = paginate(session, query, page_size=page_size)
 Create your table model
 
 ```python
-class TestTableSqlModel(SQLModel, table=True):
-    __tablename__ = 'test_table'
+class User(SQLModel, table=True):
+    __tablename__ = 'user'
 
     id: int = Field(primary_key=True)
     username: str = Field(default=None)
@@ -76,7 +76,7 @@ with Session(engine) as session:
 
     query = session.query(TestTable)
 
-    result: PageData = paginate(session, query, page_size=page_size)
+    result: PageData = paginate(session, query, page_size=100)
 ```
 
 ## Contributing 
