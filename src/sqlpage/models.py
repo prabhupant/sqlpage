@@ -7,6 +7,7 @@ T = TypeVar('T')
 class PageData(BaseModel, Generic[T]):
     items: List[T]
     next_page_token: str
+    total_items: int
 
 
 class PageToken(BaseModel):

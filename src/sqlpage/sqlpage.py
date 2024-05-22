@@ -51,7 +51,7 @@ def paginate(session, query: sqlalchemy.orm.query.Query, token: str = None, page
             )
         )
 
-    return PageData(items=result, next_page_token=next_page_token)
+    return PageData(items=result, next_page_token=next_page_token, total_items=page_token.total_count)
 
 
 def get_result(session, statement) -> Sequence[Row]:
